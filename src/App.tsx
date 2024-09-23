@@ -7,6 +7,7 @@ function App() {
   const [area, setArea] = useState("서울");
   const [places, setPlaces] = useState("경복궁");
   const [date, setDate] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onChangeArea = (e: React.ChangeEvent<HTMLInputElement>) => {
     setArea(e.target.value);
@@ -32,8 +33,7 @@ function App() {
   };
 
   const generateExcel = async (area: string, places: string, date: number): Promise<void> => {
-    console.log("come");
-
+    setIsLoading(true);
     await axios.post('http://localhost:3001/oyo/excel', {
       area: area,
       places: places,
@@ -48,8 +48,9 @@ function App() {
       const fileName = res.headers['content'];
       fileSaver.saveAs(blob, getFileNameFromContentDisposition(fileName));
     }).catch((err) => {
-      console.log("요청 실패");
-      console.log(err);
+      alert(`요청 실패 : ${err}`)
+    }).then((_) => {
+      setIsLoading(false);
     });
   }
 
@@ -74,8 +75,12 @@ function App() {
         </Div>
       </Contents>
 
-
-      <SubmitButton onClick={() => { generateExcel(area, places, date) }}>생성하기</SubmitButton>
+      {
+        isLoading ? 
+          <SubmitButton>로딩중</SubmitButton> : 
+          <SubmitButton onClick={() => { generateExcel(area, places, date) }}>생성하기</SubmitButton>
+      }
+      
     </Main>
   );
 }
